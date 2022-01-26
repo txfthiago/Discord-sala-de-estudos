@@ -1,7 +1,7 @@
 import { Box, Button, Text, TextField, Image } from '@skynexui/components'
 import appConfig from '../config.json'
-import React from 'react'
 import { useRouter } from 'next/router'
+import React, { useEffect } from 'react'
 
 //Criei uma tag title e desenvolvi oque eu quero dela
 function Titulo(props) {
@@ -20,22 +20,27 @@ function Titulo(props) {
   )
 }
 
-/*function HomePage() {
-  return (
-    <div>
-      <GlobalStyle />
-      <Title tag="h2">Boas vindas de volta </Title>
-      <h2>Discord - Alura Matrix</h2>
-    </div>
-  )
-}*/
-
-//export default HomePage
-
 export default function PaginaInicial() {
-  // const username = 'txfthiago';
   const [username, setUsername] = React.useState('txfthiago')
   const roteamento = useRouter()
+
+  const [githubAccount, setGithubAccount] = React.useState('')
+
+  useEffect(() => {
+    fetch(`https://api.github.com/users/${username}`)
+      .then(res => {
+        if (!res.ok) {
+          throw Error('Não conseguiu fazer a requisição')
+        }
+        return res.json()
+      })
+      .then(resultado => {
+        setGithubAccount(resultado)
+      })
+      .catch(err => {
+        console.log(err.message)
+      })
+  }, [username])
 
   return (
     <>
@@ -75,9 +80,7 @@ export default function PaginaInicial() {
             as="form"
             onSubmit={function (infosDoEvento) {
               infosDoEvento.preventDefault()
-              console.log('Alguém submeteu o form')
               roteamento.push('/chat')
-              //window.location.href = '/chat'
             }}
             styleSheet={{
               display: 'flex',
@@ -100,18 +103,6 @@ export default function PaginaInicial() {
               {appConfig.name}
             </Text>
 
-            {/* <input
-                            type="text"
-                            value={username}
-                            onChange={function (event) {
-                                console.log('usuario digitou', event.target.value);
-                                // Onde ta o valor?
-                                const valor = event.target.value;
-                                // Trocar o valor da variavel
-                                // através do React e avise quem precisa
-                                setUsername(valor);
-                            }}
-                        /> */}
             <TextField
               value={username}
               onChange={function (event) {
@@ -147,40 +138,98 @@ export default function PaginaInicial() {
           {/* Formulário */}
 
           {/* Photo Area */}
-          <Box
-            styleSheet={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              maxWidth: '200px',
-              padding: '16px',
-              backgroundColor: appConfig.theme.colors.neutrals[200],
-              border: '1px solid',
-              borderColor: appConfig.theme.colors.neutrals[350],
-              borderRadius: '10px',
-              flex: 1,
-              minHeight: '240px'
-            }}
-          >
-            <Image
+          {username.length > 2 && (
+            <Box
               styleSheet={{
-                borderRadius: '50%',
-                marginBottom: '16px'
-              }}
-              src={`https://github.com/${username}.png`}
-            />
-            <Text
-              variant="body4"
-              styleSheet={{
-                color: appConfig.theme.colors.neutrals[200],
-                backgroundColor: appConfig.theme.colors.neutrals[700],
-                padding: '3px 10px',
-                borderRadius: '1000px'
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                maxWidth: '200px',
+                padding: '16px',
+                backgroundColor: appConfig.theme.colors[700],
+                border: '1px solid',
+                borderColor: appConfig.theme.colors.neutrals[999],
+                borderRadius: '10px',
+                flex: 1,
+                minHeight: '240px'
               }}
             >
-              {username}
-            </Text>
-          </Box>
+              <Image
+                styleSheet={{
+                  borderRadius: '50%',
+                  marginBottom: '16px'
+                }}
+                src={`https://github.com/${username}.png`}
+              />
+              <Box
+                styleSheet={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center'
+                }}
+              >
+                <Text
+                  variant="body4"
+                  styleSheet={{
+                    color: appConfig.theme.colors.neutrals[200],
+                    backgroundColor: appConfig.theme.colors.neutrals[900],
+                    padding: '3px 10px',
+                    borderRadius: '1000px'
+                  }}
+                >
+                  {username}
+                </Text>
+                <ul
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center'
+                  }}
+                >
+                  <li>
+                    <Text
+                      variant="body4"
+                      styleSheet={{
+                        color: appConfig.theme.colors.neutrals[300]
+                      }}
+                    >
+                      {' '}
+                      {githubAccount.name}{' '}
+                    </Text>
+                  </li>
+                  <li>
+                    <Text
+                      variant="body4"
+                      styleSheet={{
+                        color: appConfig.theme.colors.neutrals[300]
+                      }}
+                    >
+                      {' '}
+                      {githubAccount.location}{' '}
+                    </Text>
+                  </li>
+                  <li>
+                    <a
+                      variant="body4"
+                      style={{
+                        border: 'solid 1px grey',
+                        padding: '0px 5px',
+                        borderRadius: '10px',
+                        textDecoration: 'none',
+                        color: appConfig.theme.colors.neutrals[300],
+                        fontSize: '10px',
+                        cursor: 'pointer'
+                      }}
+                      href={githubAccount.html_url}
+                    >
+                      {' '}
+                      Go to Git
+                    </a>
+                  </li>
+                </ul>
+              </Box>
+            </Box>
+          )}
           {/* Photo Area */}
         </Box>
       </Box>
