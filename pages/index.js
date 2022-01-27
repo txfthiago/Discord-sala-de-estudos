@@ -102,7 +102,6 @@ export default function PaginaInicial() {
             >
               {appConfig.name}
             </Text>
-
             <TextField
               value={username}
               onChange={function (event) {
@@ -190,7 +189,7 @@ export default function PaginaInicial() {
                     <Text
                       variant="body4"
                       styleSheet={{
-                        color: appConfig.theme.colors.neutrals[300]
+                        color: appConfig.theme.colors.neutrals[900]
                       }}
                     >
                       {' '}
@@ -201,7 +200,7 @@ export default function PaginaInicial() {
                     <Text
                       variant="body4"
                       styleSheet={{
-                        color: appConfig.theme.colors.neutrals[300]
+                        color: appConfig.theme.colors.neutrals[900]
                       }}
                     >
                       {' '}
@@ -212,11 +211,11 @@ export default function PaginaInicial() {
                     <a
                       variant="body4"
                       style={{
-                        border: 'solid 1px grey',
+                        border: 'solid 1px black',
                         padding: '0px 5px',
                         borderRadius: '10px',
                         textDecoration: 'none',
-                        color: appConfig.theme.colors.neutrals[300],
+                        color: appConfig.theme.colors.neutrals[900],
                         fontSize: '10px',
                         cursor: 'pointer'
                       }}
