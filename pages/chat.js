@@ -3,21 +3,44 @@ import React, { useState } from 'react'
 import appConfig from '../config.json'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faLocationArrow } from '@fortawesome/free-solid-svg-icons'
+import { createClient } from '@supabase/supabase-js'
+const SUPABASE_ANON_KEY =
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlhdCI6MTY0MzM0NjAwOSwiZXhwIjoxOTU4OTIyMDA5fQ.nOvgmS6laCUTS6xOsar5TurkpMeczM9mNpWa_y9aW1E'
+const SUPABASE_URL = 'https://qopxmvstwdzqopmvktrt.supabase.co'
+const supaBaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
 export default function ChatPage() {
   const [mensagem, setMensagem] = React.useState('')
   const [listaDeMensagens, setListaDeMensagens] = React.useState([])
+  React.useEffect(() => {
+    supaBaseClient
+      .from('mensagens')
+      .select('*')
+      .order('id', { ascending: false })
+      .then(({ data }) => {
+        console.log('Dados consultados', data)
+        setListaDeMensagens(data)
+      })
+  }, [])
 
   function handleNovaMensagem(novaMensagem) {
     const mensagem = {
-      id: listaDeMensagens.length + 1,
+      //id: listaDeMensagens.length + 1,
       de: 'txfthiago',
       texto: novaMensagem
     }
-    setListaDeMensagens([mensagem, ...listaDeMensagens])
+
+    supaBaseClient
+      .from(`mensagens`)
+      .insert([mensagem])
+      .then(data => {
+        console.log('criando mensagem', data[0])
+        setListaDeMensagens([mensagem, ...listaDeMensagens])
+      })
+
+    //
     setMensagem('')
   }
-
   return (
     <Box
       styleSheet={{
@@ -41,9 +64,9 @@ export default function ChatPage() {
           borderRadius: '5px',
           backgroundColor: appConfig.theme.colors.neutrals[500],
           height: '100%',
-          maxWidth: '55%',
+          maxWidth: '85%',
           maxHeight: '95vh',
-          padding: '32px'
+          padding: '25px'
         }}
       >
         <Header />
@@ -183,7 +206,7 @@ function MessageList(props) {
                   display: 'inline-block',
                   marginRight: '8px'
                 }}
-                src={`https://github.com/txfthiago.png`}
+                src={`https://github.com/${mensagem.de}.png`}
               />
               <Text tag="strong">{mensagem.de}</Text>
               <Text
