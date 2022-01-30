@@ -4,12 +4,26 @@ import appConfig from '../config.json'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faLocationArrow } from '@fortawesome/free-solid-svg-icons'
 import { createClient } from '@supabase/supabase-js'
+import { useRouter } from 'next/router'
+import { ButtonSendSticker } from '../src/componentes/ButtonSendSticker'
+
 const SUPABASE_ANON_KEY =
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlhdCI6MTY0MzM0NjAwOSwiZXhwIjoxOTU4OTIyMDA5fQ.nOvgmS6laCUTS6xOsar5TurkpMeczM9mNpWa_y9aW1E'
 const SUPABASE_URL = 'https://qopxmvstwdzqopmvktrt.supabase.co'
 const supaBaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
+function escutaMensagensEmTempoReal(adiconaMensagem) {
+  return supaBaseClient
+    .from('mensagens')
+    .on('INSERT', respostaLive => {
+      adiconaMensagem(respostaLive.new)
+    })
+    .subscribe()
+}
+
 export default function ChatPage() {
+  const roteamento = useRouter()
+  const usuarioLogado = roteamento.query.username
   const [mensagem, setMensagem] = React.useState('')
   const [listaDeMensagens, setListaDeMensagens] = React.useState([])
   React.useEffect(() => {
@@ -21,21 +35,26 @@ export default function ChatPage() {
         console.log('Dados consultados', data)
         setListaDeMensagens(data)
       })
+    escutaMensagensEmTempoReal(novaMensagem => {
+      setListaDeMensagens(valorAtualDaLista => {
+        return [novaMensagem, ...valorAtualDaLista]
+      })
+    })
   }, [])
 
   function handleNovaMensagem(novaMensagem) {
     const mensagem = {
       //id: listaDeMensagens.length + 1,
-      de: 'txfthiago',
+      de: usuarioLogado,
       texto: novaMensagem
     }
 
     supaBaseClient
       .from(`mensagens`)
       .insert([mensagem])
-      .then(data => {
+      .then(({ data }) => {
         console.log('criando mensagem', data[0])
-        setListaDeMensagens([mensagem, ...listaDeMensagens])
+        //
       })
 
     //
@@ -112,12 +131,13 @@ export default function ChatPage() {
                 border: '0',
                 resize: 'none',
                 borderRadius: '5px',
-                padding: '6px 8px',
+                padding: '3px 8px',
                 backgroundColor: appConfig.theme.colors.neutrals[800],
                 marginRight: '12px',
                 color: appConfig.theme.colors.neutrals[200]
               }}
             />
+
             <FontAwesomeIcon
               onClick={e => {
                 if (mensagem.length > 0) {
@@ -133,6 +153,11 @@ export default function ChatPage() {
                 color: appConfig.theme.colors.primary[600]
               }}
               icon={faLocationArrow}
+            />
+            <ButtonSendSticker
+              onStickerClick={sticker => {
+                handleNovaMensagem(':sticker: ' + sticker)
+              }}
             />
           </Box>
         </Box>
@@ -220,7 +245,14 @@ function MessageList(props) {
                 {new Date().toLocaleDateString()}
               </Text>
             </Box>
-            {mensagem.texto}
+            {/*condicional: {mensagem.texto.startsWith(':sticker:').toString()*/}
+
+            {mensagem.texto.startsWith(':sticker:') ? (
+              <Image src={mensagem.texto.replace(':sticker:', '')} />
+            ) : (
+              mensagem.texto
+            )}
+            {/*mensagem.texto*/}
           </Text>
         )
       })}
